@@ -206,10 +206,15 @@ public final class ItemTranslator {
             nbtBuilder.setCustomName(customName);
         }
 
-        ItemAttributeModifiers attributeModifiers = components.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-        if (attributeModifiers != null && tooltip.showInTooltip(DataComponentTypes.ATTRIBUTE_MODIFIERS )) {
-            // only add if attribute modifiers do not indicate to hide them
-            addAttributeLore(session, attributeModifiers, nbtBuilder, session.locale());
+        // only send attributes if the server actually has explicit custom attributes
+        // if we don't find any in customComponents, then the attributes are vanilla, which bedrock renders natively
+        // without this check we get duplicate attribute lores; one from bedrock, one from us
+        if (customComponents != null && customComponents.contains(DataComponentTypes.ATTRIBUTE_MODIFIERS)) {
+            ItemAttributeModifiers attributeModifiers = components.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+            if (attributeModifiers != null && tooltip.showInTooltip(DataComponentTypes.ATTRIBUTE_MODIFIERS )) {
+                // only add if attribute modifiers do not indicate to hide them
+                addAttributeLore(session, attributeModifiers, nbtBuilder, session.locale());
+            }
         }
 
         if (session.isAdvancedTooltips() && !TooltipOptions.hideTooltip(components)) {
